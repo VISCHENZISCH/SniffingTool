@@ -1,41 +1,70 @@
-# SniffingTool Network 
+# SniffingTool — Network Analyzer
 
-`SniffingTool` est un analyseur de trafic réseau haute performance avec une interface TUI (Terminal User Interface) ultra-moderne, conçu pour les experts en cybersécurité et les administrateurs réseau.
+> Analyseur réseau temps réel · Capture, décodage multi-protocoles et visualisation TUI
 
+## Architecture
 
-### Performance & Stabilité
-- **Multi-threading** : Capture non-bloquante via Scapy.
-- **Gestion Mémoire** : Buffer glissant pour éviter la saturation de la RAM.
-- **Filtrage BPF Natif** : Utilisez la syntaxe standard (ex: `tcp port 443`) pour un filtrage ultra-rapide.
+```
+sniffing_tool/
+├── main.py              # Point d'entrée unique
+│
+├── core/                # Couches 1 & 2 — Backend réseau
+│   ├── stats.py         # PacketStats (métriques temps réel)
+│   └── sniffer.py       # BackendSniffer — Capture + Analyse protocolaire
+│
+└── ui/                  # Interface TUI (Textual)
+    ├── widgets.py       # MetricGauge, ProtocolChart, BandwidthGauge, TopStats
+    └── app.py           # NetworkAnalyzerApp
+```
+
+## Fonctionnalités
+
+### Couche 1 — Capture Réseau
+- **AsyncSniffer Scapy** : capture non-bloquante multi-thread
+- **Filtres BPF dynamiques** : syntaxe standard (`tcp port 443`)
+- **Export PCAP** : buffer de 2000 paquets, export Wireshark (touche `e`)
+
+### Couche 2 — Analyse Multi-Protocoles
+- **TLS/SNI** : identification des domaines même en HTTPS
+- **DNS Inverse** : résolution hostname avec cache
+- **HTTP** : extraction verb + host
+- **ARP** : suivi de la table IP-MAC
+- **HexView coloré** : offset / hex / ASCII dans la TUI
+
+### Interface TUI (Textual)
+- **Protocol Chart** : répartition temps réel avec barres colorées
+- **Bande passante live** : débit en Mbps avec code couleur
+- **Géo-IP non-bloquant** : drapeaux + code pays (ThreadPoolExecutor)
+- **HexView & Tree** : inspection couche par couche de chaque paquet
+- **Export PCAP & JSON** : raccourcis clavier directs
 
 ## Installation
 
 ### Prérequis
 - Python 3.9+
-- Privilèges `root` ou `sudo` (requis pour l'accès aux interfaces réseau).
+- Privilèges `root` / `sudo` (accès aux interfaces réseau)
 
 ### Installation Express
+
 ```bash
-# 1. Cloner et configurer l'environnement
 python3 -m venv .venv
 source .venv/bin/activate
-
-# 2. Dépendances
 pip install -r requirements.txt
 ```
 
 ## Utilisation
 
-Lancez le terminal avec les droits administrateur :
-
 ```bash
-sudo .venv/bin/python analyzer_ui.py
+sudo .venv/bin/python main.py
 ```
 
 ### Raccourcis Clavier
-- `s` : **Start/Stop** :: Activer ou désactiver le bouclier de capture.
-- `c` : **Clear** :: Effacer l'historique des paquets et les alertes.
-- `f` : **Filter** :: Focus sur la barre de filtrage BPF.
-- `q` : **Quit** :: Quitter proprement le terminal.
 
-
+| Touche | Action |
+|--------|--------|
+| `s` | Start / Stop la capture |
+| `f` | Focus filtre BPF |
+| `c` | Clear la table |
+| `e` | Export PCAP (Wireshark) |
+| `j` | Export JSON |
+| `q` | Quitter |
