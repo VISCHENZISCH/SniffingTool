@@ -26,4 +26,4 @@ export_*.json
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.dbscratch/
